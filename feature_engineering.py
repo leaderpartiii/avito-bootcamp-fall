@@ -84,3 +84,25 @@ def add_ua_features(df: pd.DataFrame, col: str = 'user_agent') -> DataFrame:
     df['chrome_major_version'] = pd.to_numeric(chrome_ver, errors='coerce').fillna(0).astype(int)
 
     return df
+
+
+def add_temporal_features(df: pd.DataFrame, col: str = 'event_ts') -> DataFrame:
+    """Добавляет признаки времени события без использования target.
+
+    Час считается циклическим: расстояние от 23:00 до 00:00 равно одному часу.
+    Часовой профиль cookie и его лаги агрегируются позже на уровне cookie.
+    """
+    df[col] = pd.to_datetime(df[col])
+    hour = df[col].dt.hour.astype('int16')
+    angle = 2 * np.pi * hour / 24.0
+
+    df['event_hour'] = hour
+    df['hour_sin_1'] = np.sin(angle)
+    df['hour_cos_1'] = np.cos(angle)
+    df['hour_sin_2'] = np.sin(2 * angle)
+    df['hour_cos_2'] = np.cos(2 * angle)
+    df['hour_distance_to_23'] = np.minimum(np.abs(hour - 23), 24 - np.abs(hour - 23))
+    df['is_night'] = hour.isin([0, 1, 2, 3, 4, 5, 6]).astype('uint8')
+    df['is_evening'] = hour.isin([18, 19, 20, 21, 22, 23]).astype('uint8')
+    df['is_late_evening'] = hour.isin([22, 23]).astype('uint8')
+    return df
