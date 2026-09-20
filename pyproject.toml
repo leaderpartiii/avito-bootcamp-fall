@@ -17,6 +17,7 @@ dependencies = [
     "transformers (>=5.17.0,<6.0.0)",
     "torch (>=2.14.0,<3.0.0)",
     "xgboost (>=3.4.1,<4.0.0)",
+    "optuna (>=5.0.0,<6.0.0)",
 ]
 
 
